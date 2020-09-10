@@ -6,7 +6,7 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run: aws cloudformation update-stack --stack-name udacity-cd --template-body file://servers.yml --region us-west-2
+      - run: aws cloudformation create-stack --stack-name udacity-cd --template-body file://servers.yml --region us-west-2
 
 workflows:
   deploy_workflow:
