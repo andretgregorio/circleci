@@ -2,5 +2,7 @@
 - name: Exercise for setting up a web server in an EC2 instance
   hosts: all
   user: ubuntu
+  vars:
+    - ansible_host_key_checking: false
   roles:
     - apache-hello-world
