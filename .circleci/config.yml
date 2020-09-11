@@ -3,10 +3,20 @@ version: 2.1
 jobs:
   create_infrastructure:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - run: aws cloudformation create-stack --stack-name udacity-cd --template-body file://servers.yml --region us-west-2
+      - add_ssh_keys:
+          fingerprints:
+            - "ea:7d:21:ef:24:86:2a:4f:0b:b1:c3:fa:3f:e9:2a:4d"
+      - run:
+          name: Install Dependencies
+          command: |
+            apk add --update ansible
+      - run:
+          name: Configure server
+          command: |
+            ansible-playbook -i inventory.txt main-apache-hello-world.yml
 
 workflows:
   deploy_workflow:
