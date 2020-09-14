@@ -18,7 +18,28 @@ jobs:
           command: |
             ansible-playbook -i inventory main-apache-hello-world.yml
 
+  smoke_test:
+    docker:
+      - image: alpine:latest
+    steps:
+      - run:
+          name: Install CURL
+          command: apk add --update curl
+      - run:
+          name: Curl website
+          command: |
+            URL="https://blog.udacity.com/"
+            if curl -s --head ${URL}
+            then
+              return 0
+            else
+              return 1
+            fi
+
 workflows:
   deploy_workflow:
     jobs:
       - create_infrastructure
+      - smoke_test:
+          requires:
+            - create_infrastructure
