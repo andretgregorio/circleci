@@ -1,5 +1,14 @@
 version: 2.1
 
+commands:
+  destroy_environment:
+    steps:
+      - run:
+          name: Destroy environment
+          command: |
+            aws cloudformation delete-stack --stack-name servers
+          when: on_fail
+
 jobs:
   create_infrastructure:
     docker:
@@ -36,10 +45,30 @@ jobs:
               return 1
             fi
 
+  destroy_stack:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - run:
+          name: Simulate Error
+          command: |
+            return 1
+      - destroy_environment
+
+  deploy_and_create_static_website:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Deploy Static Website
+          command: |
+            aws cloudformation deploy \
+            --template-file cloudfront/bucket.yml \
+            --stack-name ${CIRCLE_WORKFLOW_ID:0:7} \
+            --parameter-overrides NAME="${CIRCLE_WORKFLOW_ID:0:7}"
+
 workflows:
   deploy_workflow:
     jobs:
-      - create_infrastructure
-      - smoke_test:
-          requires:
-            - create_infrastructure
+      - deploy_and_create_static_website
